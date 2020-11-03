@@ -16,6 +16,7 @@ import plotly.graph_objects as go
 
 import data
 
+os.mkdir('data/app')
 
 def retrieve_name(var):
     """
