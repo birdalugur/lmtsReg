@@ -14,7 +14,6 @@ import plotly.express as px
 import plotly.offline as offline
 import plotly.graph_objects as go
 
-import ipynb
 import data
 
 
@@ -47,15 +46,15 @@ def get_d_values(file):
     """
     Run the R script and get the results."""
     os.system('Rscript dvals.R {}'.format(file))
-    return pd.read_csv('d_values.csv', index_col=0)
+    return pd.read_csv('data/app/d_values.csv', index_col=0)
 
 
 # d'leri hesapla
 df = data.pwt()
 df = ln_diff(df)
 df = constrain(df, 48)
-df.to_csv('lndiff.csv')
-d_values = get_d_values('lndiff.csv')
+df.to_csv('data/app/lndiff.csv')
+d_values = get_d_values('data/app/lndiff.csv')
 
 
 # data.indicator('imf')
@@ -122,4 +121,4 @@ print('r square:\n', r_square)
 # PLOT
 fig = px.scatter(x=X[0], y=y, text=countries)
 fig.add_traces(go.Scatter(x=test[0], y=test['y_pred'], name='Regression Fit'))
-offline.plot(fig)
+offline.plot(fig, filename='data/app/regression.html')

@@ -52,6 +52,6 @@ df_list<-lapply(data[2:length(data)],get_d_values)
 
 d_values = do.call(what = rbind, args = df_list)
 
-result_path = paste(env_path,'/d_values.csv',sep="")
-
+result_path = paste(env_path,'/data/app/d_values.csv',sep="")
+print(result_path)
 write.csv(d_values,result_path)
