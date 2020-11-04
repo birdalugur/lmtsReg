@@ -3,7 +3,6 @@
 
 
 import pandas as pd
-import numpy as np
 import os
 
 
@@ -146,7 +145,7 @@ def read_wb(code: str, date=None):
 
     data = pd.read_csv(path)
 
-    data.drop(data.tail(5).index, inplace=True)
+    data = data.drop(data.tail(5).index).dropna(how='all')
 
     data.rename(columns={'Time Code': 'date',
                          'Series Code': 'indicator'}, inplace=True)
@@ -159,8 +158,7 @@ def read_wb(code: str, date=None):
     if date is not None:
         data = data[data.date >= str(date)]
 
-    data = data[data.indicator == code].drop(
-        'indicator', axis=1).set_index('date')
+    data = data.drop('indicator', axis=1).set_index('date')
 
     return data
 
