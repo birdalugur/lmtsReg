@@ -3,6 +3,7 @@
 
 
 import os
+import subprocess
 import inspect
 
 import pandas as pd
@@ -16,7 +17,11 @@ import plotly.graph_objects as go
 
 import data
 
-os.mkdir('data/app')
+try:
+    os.mkdir('data/app')
+except FileExistsError:
+    pass
+
 
 def retrieve_name(var):
     """
@@ -46,7 +51,13 @@ def constrain(data, n):
 def get_d_values(file):
     """
     Run the R script and get the results."""
-    os.system('Rscript dvals.R {}'.format(file))
+    if os.name == 'posix':
+        command = 'Rscript dvals.R {}'.format(file)
+        os.system(command)
+    else:
+        command = 'C:/Program Files/R/R-3.6.2/bin/x64/Rscript dvals.R {}'.format(file)
+        subprocess.call(command)
+
     return pd.read_csv('data/app/d_values.csv', index_col=0)
 
 
@@ -56,7 +67,6 @@ df = ln_diff(df)
 df = constrain(df, 48)
 df.to_csv('data/app/lndiff.csv')
 d_values = get_d_values('data/app/lndiff.csv')
-
 
 # data.indicator('imf')
 # data.indicator('wb')
@@ -72,21 +82,17 @@ wbdata = data.read_wb('SP.POP.GROW', date=1950)
 
 bldata = data.read_BL(code='attain', variable='No Schooling', date=1950)
 
-
 # ln(x)-ln(usa) farklarının hesaplanmasını istediğimiz değişkenleri burada belirtiyloruz
 ln_list = [bldata, wbdata]
-
 
 for var in ln_list:
     print(retrieve_name(var))
     globals()[retrieve_name(var)] = ln_diff(var)
 
-
 # Select X and y
 X = [eora, woid, wbdata]
 
 y = d_values.elw_m
-
 
 X = list(map(lambda x: x.mean(), X))
 X = pd.concat(X, axis=1).dropna()
@@ -94,7 +100,6 @@ countries = y.index.intersection(X.index)
 
 X = X.loc[countries]
 y = y[countries]
-
 
 # Test Verisi
 test = X.copy()
@@ -104,12 +109,10 @@ for i in average.index:
 
 test = test.sort_values(0)
 
-
 # Lineer Regresyon kullanarak tahmin
 regr = LinearRegression()
 regr.fit(X, y)
 test['y_pred'] = regr.predict(test)
-
 
 coefficients = regr.coef_
 intercept = regr.intercept_
@@ -117,7 +120,6 @@ r_square = r2_score(y.reindex(test.index), test['y_pred'])
 print('coefficients:\n', coefficients)
 print('intercept:\n', intercept)
 print('r square:\n', r_square)
-
 
 # PLOT
 fig = px.scatter(x=X[0], y=y, text=countries)
