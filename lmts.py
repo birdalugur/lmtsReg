@@ -55,10 +55,15 @@ def get_d_values(file):
         command = 'Rscript dvals.R {}'.format(file)
         os.system(command)
     else:
-        command = 'C:/Program Files/R/R-3.6.2/bin/x64/Rscript dvals.R {}'.format(file)
+        command = 'C:/Program Files/R/R-3.6.3/bin/x64/Rscript dvals.R {}'.format(file)
         subprocess.call(command)
+    
+    try:
+        d = pd.read_csv('data/app/d_values.csv', index_col=0)
+    except FileNotFoundError:
+        raise Exception("Please update your R path.")
 
-    return pd.read_csv('data/app/d_values.csv', index_col=0)
+    return d
 
 
 # d'leri hesapla
