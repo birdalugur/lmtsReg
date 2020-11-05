@@ -118,6 +118,8 @@ def read_imf(code: str, frequency: str, date: int = None):
     data = data[data.indicator == code].drop(
         'indicator', axis=1).set_index('date')
 
+    data = data[~data.index.duplicated()]
+
     return data
 
 
@@ -293,10 +295,10 @@ def __date_control(x):
     return list(zip(start, end))
 
 
-def control(data, name=None):
+def control(data, freq: str='a', name=None):
     df = data.copy()
 
-    if isinstance(df.index.to_period().freq, offset.QuarterEnd):
+    if freq == 'q':
         df_year = df.apply(__date_control_quarter)
     else:
         df.index = df.index.to_series().dt.year
