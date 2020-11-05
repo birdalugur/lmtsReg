@@ -2,8 +2,9 @@
 # coding: utf-8
 
 
-import pandas as pd
 import os
+import pandas as pd
+import pandas.tseries.offsets as offset
 
 
 # #### OECD VERİSİ -  PWT
@@ -16,7 +17,7 @@ def oecd():
 
     # Frequency: Q (quarterly), Measure:  Index, Subject:  volidx Olanlar Seçiliyor
     data_oecd = data_oecd[(data_oecd['FREQUENCY'] == 'Q') & (
-        data_oecd['MEASURE'] == 'IDX') & (data_oecd['SUBJECT'] == 'VOLIDX')]
+            data_oecd['MEASURE'] == 'IDX') & (data_oecd['SUBJECT'] == 'VOLIDX')]
 
     oecd = data_oecd.pivot(index='date', columns='LOCATION', values='Value')
     oecd.columns.name = None
@@ -262,3 +263,48 @@ def read_BL(code: str, variable: str, date: int = None):
     data = data.pivot(index='date', columns='Country', values=variable)
 
     return data
+
+
+def __date_control_quarter(x):
+    dates = x.dropna().index.to_series()
+
+    start = dates.diff() < offset.Day(95)
+    end = dates.shift(-1) - dates < offset.Day(95)
+
+    start = dates[~start].values
+    end = dates[~end].values
+
+    start = pd.PeriodIndex(start, freq='Q')
+    end = pd.PeriodIndex(end, freq='Q')
+
+    return list(zip(start, end))
+
+
+def __date_control(x):
+    dates = x.dropna().index.to_series()
+
+    start = dates.diff() != 1
+
+    end = dates.shift(-1) - dates != 1
+
+    start = dates[start].values
+    end = dates[end].values
+
+    return list(zip(start, end))
+
+
+def control(data, name=None):
+    df = data.copy()
+
+    if isinstance(df.index.to_period().freq, offset.QuarterEnd):
+        df_year = df.apply(__date_control_quarter)
+    else:
+        df.index = df.index.to_series().dt.year
+        df_year = df.apply(__date_control)
+    if isinstance(df_year, pd.DataFrame):
+        df_year = df_year.loc[0]
+    df_result = pd.concat([df_year, df.count()], axis=1)
+    df_result.columns = ['start-end', 'total']
+    if name is not None:
+        df_result['name'] = name
+    return df_result
