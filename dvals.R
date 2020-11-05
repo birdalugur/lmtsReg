@@ -1,4 +1,6 @@
-env_path = '/home/bilgi/Desktop/lmts'
+#env_path = '/home/bilgi/Desktop/lmts'
+env_path = getwd()
+
 setwd(env_path)
 library(LongMemoryTS)
 
