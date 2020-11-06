@@ -24,16 +24,26 @@ def oecd():
     return oecd
 
 
-def pwt():
-    data_pwt = pd.read_excel(
-        'data/pwt91.xlsx', sheet_name='Data', usecols=['year', 'countrycode', 'rgdpo'])
+def read_pwt(code: str, date: int):
+    data = pd.read_excel(
+        'data/pwt91.xlsx', sheet_name='Data', usecols=['year', 'countrycode', code])
 
-    data_pwt = data_pwt.rename(columns={'year': 'date'})
+    data = data.rename(columns={'year': 'date'})
 
-    pwt = data_pwt.pivot(
-        index='date', columns='countrycode').droplevel(axis=1, level=0)
-    pwt.columns.name = None
-    return pwt
+    data['date'] = pd.to_datetime(data.date.astype(str))
+
+    if date is not None:
+        data = data[data.date >= str(date)]
+
+    data = data.pivot(index='date', columns='countrycode').droplevel(axis=1, level=0)
+
+    data.columns.name = None
+
+    return data
+
+
+def __pwt_indicator():
+    return pd.read_excel('data/pwt91.xlsx', sheet_name='Legend')
 
 
 # #### EORA - WOID
@@ -60,7 +70,7 @@ def from_eora(path='data/dataeora.csv', rate_type='gexp', request_var='gvc', dat
     return __read_eorawoid(path, rate_type, request_var, date)
 
 
-def from_WOID(path='data/WOID_data.csv', rate_type='gexp', request_var='gvc', date=None):
+def from_woid(path='data/WOID_data.csv', rate_type='gexp', request_var='gvc', date=None):
     return __read_eorawoid(path, rate_type, request_var, date)
 
 
@@ -71,11 +81,14 @@ def indicator(name):
     if name == 'imf':
         return __imf_indicator()
     elif name == 'bl':
-        indicator = pd.read_csv('data/X/lee&lee/indicator.csv')
+        definition = pd.read_csv('data/X/lee&lee/indicator.csv')
+    elif name == 'pwt':
+        return __pwt_indicator()
+    elif name == 'wb':
+        definition = pd.read_csv('data/X/wb/indicator.csv')
     else:
-        path = 'data/X/{}/indicator.csv'.format(name)
-        indicator = pd.read_csv(path)
-    return indicator
+        raise ValueError('No indicator with specified name.')
+    return definition
 
 
 def __imf_indicator():
@@ -244,7 +257,7 @@ def __lee_attain(date: int = None, ):
     return data
 
 
-def read_BL(code: str, variable: str, date: int = None):
+def read_bl(code: str, variable: str, date: int = None):
     if code == 'hc':
         data = __lee_hc()
     elif code == 'enrol':
@@ -295,7 +308,7 @@ def __date_control(x):
     return list(zip(start, end))
 
 
-def control(data, freq: str='a', name=None):
+def control(data, freq: str = 'a', name=None):
     df = data.copy()
 
     if freq == 'q':

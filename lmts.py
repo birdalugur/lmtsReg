@@ -67,7 +67,7 @@ def get_d_values(file):
 
 
 # d'leri hesapla
-df = data.pwt()
+df = data.read_pwt('pl_g')
 df = ln_diff(df)
 df = constrain(df, 48)
 df.to_csv('data/app/lndiff.csv')
@@ -80,12 +80,12 @@ d_values = get_d_values('data/app/lndiff.csv')
 
 # Read X values
 eora = data.from_eora(date=1950)
-woid = data.from_WOID(date=1950)
+woid = data.from_woid(date=1950)
 
 imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
 wbdata = data.read_wb('SP.POP.GROW', date=1950)
 
-bldata = data.read_BL(code='attain', variable='No Schooling', date=1950)
+bldata = data.read_bl(code='attain', variable='No Schooling', date=1950)
 
 # ln(x)-ln(usa) farklarının hesaplanmasını istediğimiz değişkenleri burada belirtiyloruz
 ln_list = [bldata, wbdata]
