@@ -42,8 +42,8 @@ def read_pwt(code: str, date: int):
     return data
 
 
-def __pwt_indicator():
-    return pd.read_excel('data/pwt91.xlsx', sheet_name='Legend')
+def __pwt_source():
+    return pd.read_excel('data/pwt91.xlsx', sheet_name='indicator')
 
 
 # #### EORA - WOID
@@ -74,34 +74,34 @@ def from_woid(path='data/WOID_data.csv', rate_type='gexp', request_var='gvc', da
     return __read_eorawoid(path, rate_type, request_var, date)
 
 
-# #### Indicator
+# #### source
 
 
-def indicator(name):
+def source(name):
     if name == 'imf':
-        return __imf_indicator()
+        return __imf_source()
     elif name == 'bl':
         definition = pd.read_csv('data/X/lee&lee/indicator.csv')
     elif name == 'pwt':
-        return __pwt_indicator()
+        return __pwt_source()
     elif name == 'wb':
         definition = pd.read_csv('data/X/wb/indicator.csv')
     else:
-        raise ValueError('No indicator with specified name.')
+        raise ValueError('No source with specified name.')
     return definition
 
 
-def __imf_indicator():
+def __imf_source():
     available = pd.read_csv('data/X/imf/annually.csv',
                             usecols=['indicator'], squeeze=True).unique()
 
-    imf_indicator = pd.read_excel('data/X/imf/indicator.xlsx', sheet_name='IFS',
+    imf_source = pd.read_excel('data/X/imf/indicator.xlsx', sheet_name='IFS',
                                   skiprows=1, usecols=['Indicator Name', 'Indicator Code'])
 
-    imf_indicator = imf_indicator[imf_indicator['Indicator Code'].isin(
+    imf_source = imf_source[imf_source['Indicator Code'].isin(
         available)]
 
-    return imf_indicator
+    return imf_source
 
 
 # #### IMF Data
@@ -205,7 +205,7 @@ def __country_codes():
     return codes
 
 
-def __lee_hc(date: int = None):
+def __lee_hc():
     data = pd.read_excel('data/X/lee&lee/LeeLee_HC_MF1564 (1).xls', header=7)
 
     data = data.dropna(subset=['Year', 'Population\n(1000s)'])
@@ -224,7 +224,7 @@ def __lee_hc(date: int = None):
     return data
 
 
-def __lee_enrol(date: int = None):
+def __lee_enrol():
     data = pd.read_excel('data/X/lee&lee/LeeLee_enroll_MF (1).xls', header=7)
 
     data = data.dropna(subset=['Year'])
@@ -240,7 +240,7 @@ def __lee_enrol(date: int = None):
     return data
 
 
-def __lee_attain(date: int = None, ):
+def __lee_attain():
     data = pd.read_excel('data/X/lee&lee/LeeLee_attain_MF1564.xls',
                          header=7).rename(columns={'Unnamed: 3': 'Age Group 2'})
 
@@ -322,4 +322,5 @@ def control(data, freq: str = 'a', name=None):
     df_result.columns = ['start-end', 'total']
     if name is not None:
         df_result['name'] = name
+    df_result.to_csv('data/app/control.csv')
     return df_result

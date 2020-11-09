@@ -1,10 +1,11 @@
 import lmts
 import data
 
-# indicator değişkenleri
-indicator_imf = data.indicator('imf')
-indicator_bl = data.indicator('bl')
-indicator_wb = data.indicator('wb')
+# source değişkenleri
+source_imf = data.source('imf')
+source_bl = data.source('bl')
+source_wb = data.source('wb')
+source_pwt = data.source('pwt')
 
 # d'leri hesaplamak için veri okunuyor
 d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
@@ -13,7 +14,7 @@ d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
 d_data = lmts.ln(d_data)
 
 # data-USA
-d_data = lmts.diff(d_data, 'USA')
+d_data = lmts.diff(d_data, 'USA', drop=True)
 
 # 48'den az veri içeren ülkeleri kaldır
 d_data = lmts.constrain(d_data, 48)
@@ -32,7 +33,7 @@ bldata = data.read_bl(code='attain', variable='No Schooling', date=1950)
 imfdata, wbdata, woid = lmts.ln([imfdata, wbdata, woid])
 
 # Birden fazla değişken için USA farkı hesaplama
-wbdata, woid = lmts.diff([wbdata, woid], 'USA')
+wbdata, woid = lmts.diff([wbdata, woid], 'USA', drop=True)
 
 
 # Regresyon için independent değişkenleri seçme

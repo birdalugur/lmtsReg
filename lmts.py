@@ -42,15 +42,30 @@ def ln(df):
     return np.log(df)
 
 
-def diff(df, country):
+def diff(df, country, drop=False):
     """
     Example: X-USA"""
+
     if isinstance(df, list):
         diff_list = []
         for _df in df:
-            diff_list.append(_df.sub(_df[country], axis=0).drop(country, axis=1))
+            if country == 'mean':
+                diff_value = _df.mean(axis=1)
+            else:
+                diff_value = _df[country]
+            diff = _df.sub(diff_value, axis=0)
+            if drop:
+                diff = diff.drop(country, axis=1)
+            diff_list.append(diff)
         return diff_list
-    return df.sub(df[country], axis=0).drop(country, axis=1)
+    if country == 'mean':
+        diff_value = df.mean(axis=1)
+    else:
+        diff_value = df[country]
+    diff = df.sub(diff_value, axis=0)
+    if drop:
+        diff = diff.drop(country, axis=1)
+    return diff
 
 
 def constrain(data, n):
