@@ -15,12 +15,12 @@ import plotly.express as px
 import plotly.offline as offline
 import plotly.graph_objects as go
 
-import data
 
-try:
-    os.mkdir('data/app')
-except FileExistsError:
-    pass
+def create_appdata():
+    try:
+        os.mkdir('data/app')
+    except FileExistsError:
+        pass
 
 
 def retrieve_name(var):
@@ -31,13 +31,26 @@ def retrieve_name(var):
     return [var_name for var_name, var_val in callers_local_vars if var_val is var][0]
 
 
-def ln_diff(data, country='USA'):
+def ln(df):
     """
-    ln_diff = ln(X) - ln(USA) and remove 'USA' column."""
+    Doğal logaritmayı hesaplar."""
+    if isinstance(df, list):
+        ln_list = []
+        for _df in df:
+            ln_list.append(np.log(_df))
+        return ln_list
+    return np.log(df)
 
-    ln_data = np.log(data)
-    ln_data = ln_data.sub(ln_data[country], axis=0)
-    return ln_data.drop(country, axis=1)
+
+def diff(df, country):
+    """
+    Example: X-USA"""
+    if isinstance(df, list):
+        diff_list = []
+        for _df in df:
+            diff_list.append(_df.sub(_df[country], axis=0).drop(country, axis=1))
+        return diff_list
+    return df.sub(df[country], axis=0).drop(country, axis=1)
 
 
 def constrain(data, n):
@@ -48,16 +61,19 @@ def constrain(data, n):
     return data
 
 
-def get_d_values(file):
+def get_d_values(df):
     """
     Run the R script and get the results."""
+    file = 'data/app/lndiff.csv'
+    df.to_csv('data/app/lndiff.csv')
+
     if os.name == 'posix':
         command = 'Rscript dvals.R {}'.format(file)
         os.system(command)
     else:
         command = 'C:/Program Files/R/R-3.6.3/bin/x64/Rscript dvals.R {}'.format(file)
         subprocess.call(command)
-    
+
     try:
         d = pd.read_csv('data/app/d_values.csv', index_col=0)
     except FileNotFoundError:
@@ -66,67 +82,65 @@ def get_d_values(file):
     return d
 
 
-# d'leri hesapla
-df = data.read_pwt('pl_g')
-df = ln_diff(df)
-df = constrain(df, 48)
-df.to_csv('data/app/lndiff.csv')
-d_values = get_d_values('data/app/lndiff.csv')
-
-# data.indicator('imf')
-# data.indicator('wb')
-# data.indicator('bl')
+def mean(data):
+    if isinstance(data, list):
+        return list(map(lambda x: x.mean(), data))
+    return data.mean()
 
 
-# Read X values
-eora = data.from_eora(date=1950)
-woid = data.from_woid(date=1950)
+def intersection(X, y):
+    X = pd.concat(X, axis=1).dropna()
+    countries = y.index.intersection(X.index)
+    X = X.loc[countries]
+    y = y[countries]
+    return X, y
 
-imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
-wbdata = data.read_wb('SP.POP.GROW', date=1950)
 
-bldata = data.read_bl(code='attain', variable='No Schooling', date=1950)
+def test_data(X):
+    # Test Verisi
+    test = X.copy()
+    average = X.mean()[1:]
+    for i in average.index:
+        test[i] = average[i]
 
-# ln(x)-ln(usa) farklarının hesaplanmasını istediğimiz değişkenleri burada belirtiyloruz
-ln_list = [bldata, wbdata]
+    test = test.sort_values(0)
+    return test
 
-for var in ln_list:
-    print(retrieve_name(var))
-    globals()[retrieve_name(var)] = ln_diff(var)
 
-# Select X and y
-X = [eora, woid, wbdata]
+class Model:
+    __model = LinearRegression()
 
-y = d_values.elw_m
+    def __init__(self, X_true, y_true, X_test):
+        self.training_data = X_true
+        self.target_values = y_true
+        self.test_values = X_test
+        self.__fit()
 
-X = list(map(lambda x: x.mean(), X))
-X = pd.concat(X, axis=1).dropna()
-countries = y.index.intersection(X.index)
+    def __fit(self):
+        self.__model.fit(self.training_data, self.target_values)
 
-X = X.loc[countries]
-y = y[countries]
+    def predict(self):
+        return self.__model.predict(self.test_values)
 
-# Test Verisi
-test = X.copy()
-average = X.mean()[1:]
-for i in average.index:
-    test[i] = average[i]
+    @property
+    def intercept(self):
+        return self.__model.intercept_
 
-test = test.sort_values(0)
+    @property
+    def r_square(self):
+        # TODO: r2 hesaplanacak
+        pass
 
-# Lineer Regresyon kullanarak tahmin
-regr = LinearRegression()
-regr.fit(X, y)
-test['y_pred'] = regr.predict(test)
+    @property
+    def cofficients(self):
+        return self.__model.coef_
 
-coefficients = regr.coef_
-intercept = regr.intercept_
-r_square = r2_score(y.reindex(test.index), test['y_pred'])
-print('coefficients:\n', coefficients)
-print('intercept:\n', intercept)
-print('r square:\n', r_square)
+    def plot(self) -> go.Figure:
+        fig = px.scatter(x=self.training_data[0], y=self.target_values)
+        fig.add_traces(go.Scatter(x=self.test_values[0], y=self.predict(), name='Regression Fit'))
+        offline.plot(fig, filename='data/app/regression.html')
 
-# PLOT
-fig = px.scatter(x=X[0], y=y, text=countries)
-fig.add_traces(go.Scatter(x=test[0], y=test['y_pred'], name='Regression Fit'))
-offline.plot(fig, filename='data/app/regression.html')
+
+if __name__ == 'lmts':
+    # data/app klasörünü oluşturur.
+    create_appdata()
