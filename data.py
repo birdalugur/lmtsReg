@@ -42,8 +42,9 @@ def read_pwt(code: str, date: int):
     return data
 
 
-def __pwt_source():
-    return pd.read_excel('data/pwt91.xlsx', sheet_name='indicator')
+def read_eora():
+    # TODO
+    pass
 
 
 # #### EORA - WOID
@@ -66,7 +67,7 @@ def __read_eorawoid(path, rate_type, request_var, date=None):
     return requested_data
 
 
-def from_eora(path='data/dataeora.csv', rate_type='gexp', request_var='gvc', date=None):
+def from_eora(path='data/eora.csv', rate_type='gexp', request_var='gvc', date=None):
     return __read_eorawoid(path, rate_type, request_var, date)
 
 
@@ -86,6 +87,8 @@ def source(name):
         return __pwt_source()
     elif name == 'wb':
         definition = pd.read_csv('data/X/wb/indicator.csv')
+    elif name == 'eora':
+        definition = pd.read_csv('data/X/eora/indicator.csv')
     else:
         raise ValueError('No source with specified name.')
     return definition
@@ -96,12 +99,16 @@ def __imf_source():
                             usecols=['indicator'], squeeze=True).unique()
 
     imf_source = pd.read_excel('data/X/imf/indicator.xlsx', sheet_name='IFS',
-                                  skiprows=1, usecols=['Indicator Name', 'Indicator Code'])
+                               skiprows=1, usecols=['Indicator Name', 'Indicator Code'])
 
     imf_source = imf_source[imf_source['Indicator Code'].isin(
         available)]
 
     return imf_source
+
+
+def __pwt_source():
+    return pd.read_excel('data/pwt91.xlsx', sheet_name='indicator')
 
 
 # #### IMF Data
