@@ -42,9 +42,9 @@ def read_pwt(code: str, date: int):
     return data
 
 
-def read_eora():
-    # TODO
-    pass
+def read_eora(code):
+    data = pd.read_csv('data/X/eora/eora.csv')
+    return data[data.type == code]
 
 
 # #### EORA - WOID
