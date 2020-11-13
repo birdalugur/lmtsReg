@@ -274,6 +274,14 @@ def __lee_attain():
 
 
 def read_bl(code: str, date: int = None):
+    """
+    Barro-Lee Verisini okuyun.
+
+    Args:
+        code: (str) : İstenen indicator'a karşılık gelen kod.
+        date: (int) : Veri hangi yıldan itibaren okunsun?
+
+    """
     file = code.partition('_')[0]
     code = code.partition('_')[-1]
     if file == 'hc':
@@ -327,6 +335,9 @@ def __date_control(x):
 
 
 def control(data, freq: str = 'a', name=None):
+    """
+    Verileri kontrol etmek için kullanılır.
+    """
     df = data.copy()
 
     if freq == 'q':
