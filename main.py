@@ -6,6 +6,7 @@ source_imf = data.source('imf')
 source_bl = data.source('bl')
 source_wb = data.source('wb')
 source_pwt = data.source('pwt')
+source_eora = data.source('eora')
 
 # d'leri hesaplamak için veri okunuyor
 d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
@@ -23,21 +24,21 @@ d_data = lmts.constrain(d_data, 48)
 d_values = lmts.get_d_values(d_data)
 
 # Read X values
-eora = data.from_eora(date=1950)
-woid = data.from_woid(date=1950)
+datawoid = data.read_wb('daa', date=1950)
+eora = data.read_eora('daa', date=1950)
 imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
 wbdata = data.read_wb('SP.POP.GROW', date=1950)
-bldata = data.read_bl(code='attain', variable='No Schooling', date=1950)
+bldata = data.read_bl(code='attain_No Schooling', date=1950)
+pwtdata = data.read_pwt(code='statcap', date=None)
 
 # Birden fazla değişken için ln alma
-imfdata, wbdata, woid = lmts.ln([imfdata, wbdata, woid])
+imfdata, pwtdata = lmts.ln([imfdata, pwtdata])
 
 # Birden fazla değişken için USA farkı hesaplama
-wbdata, woid = lmts.diff([wbdata, woid], 'USA', drop=True)
-
+wbdata, bldata = lmts.diff([wbdata, bldata], 'USA', drop=True)
 
 # Regresyon için independent değişkenleri seçme
-X = [eora, woid, wbdata]
+X = [eora, pwtdata, wbdata]
 
 # Ortalamaları alma
 X = lmts.mean(X)
@@ -54,4 +55,3 @@ X_test = lmts.test_data(X)
 # Regresyon
 model = lmts.Model(X, y, X_test)
 model.plot()
-

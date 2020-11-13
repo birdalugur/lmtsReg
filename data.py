@@ -24,7 +24,7 @@ def oecd():
     return oecd
 
 
-def read_pwt(code: str, date: int):
+def read_pwt(code: str, date: int = None):
     data = pd.read_excel(
         'data/pwt91.xlsx', sheet_name='Data', usecols=['year', 'countrycode', code])
 
@@ -42,37 +42,44 @@ def read_pwt(code: str, date: int):
     return data
 
 
-def read_eora(code):
+def read_eora(code, date=None):
+    """
+    Seçilen değişkene ait sektörlerin toplamını döndürür.
+    """
     data = pd.read_csv('data/X/eora/eora.csv')
-    return data[data.type == code]
-
-
-# #### EORA - WOID
-
-
-def __read_eorawoid(path, rate_type, request_var, date=None):
-    sector_data = pd.read_csv(path, index_col=['type', 'year', 'country'])
+    data = data.rename(columns={'year': 'date'})
+    data['date'] = pd.to_datetime(data.date.astype(str))
+    data = data[data.type == code]
     if date is not None:
-        sector_data = sector_data[sector_data.index.get_level_values(
-            'year') >= date]
+        data = data[data.date >= str(date)]
 
-    sector_data = sector_data.sum(axis=1)
+    data = data \
+        .set_index(['date', 'country']) \
+        .sum(axis=1) \
+        .reset_index() \
+        .pivot(index='date', columns='country', values=0)
 
-    sector_data = sector_data.groupby(
-        level=['year', 'country'], group_keys=False).apply(lambda x: x / x.loc[rate_type])
-
-    requested_data = sector_data.xs(request_var, level='type').sort_index()
-
-    requested_data = requested_data.unstack()
-    return requested_data
+    return data
 
 
-def from_eora(path='data/eora.csv', rate_type='gexp', request_var='gvc', date=None):
-    return __read_eorawoid(path, rate_type, request_var, date)
+def read_woid(code, date=None):
+    """
+    Seçilen değişkene ait sektörlerin toplamını döndürür.
+    """
+    data = pd.read_csv('data/X/woid/WOID_data.csv')
+    data = data.rename(columns={'year': 'date'})
+    data['date'] = pd.to_datetime(data.date.astype(str))
+    data = data[data.type == code]
+    if date is not None:
+        data = data[data.date >= str(date)]
 
+    data = data \
+        .set_index(['date', 'country']) \
+        .sum(axis=1) \
+        .reset_index() \
+        .pivot(index='date', columns='country', values=0)
 
-def from_woid(path='data/WOID_data.csv', rate_type='gexp', request_var='gvc', date=None):
-    return __read_eorawoid(path, rate_type, request_var, date)
+    return data
 
 
 # #### source
@@ -89,6 +96,8 @@ def source(name):
         definition = pd.read_csv('data/X/wb/indicator.csv')
     elif name == 'eora':
         definition = pd.read_csv('data/X/eora/indicator.csv')
+    elif name == 'woid':
+        definition = pd.read_csv('data/X/woid/indicator.csv')
     else:
         raise ValueError('No source with specified name.')
     return definition
@@ -264,12 +273,14 @@ def __lee_attain():
     return data
 
 
-def read_bl(code: str, variable: str, date: int = None):
-    if code == 'hc':
+def read_bl(code: str, date: int = None):
+    file = code.partition('_')[0]
+    code = code.partition('_')[-1]
+    if file == 'hc':
         data = __lee_hc()
-    elif code == 'enrol':
+    elif file == 'enrol':
         data = __lee_enrol()
-    elif code == 'attain':
+    elif file == 'attain':
         data = __lee_attain()
     else:
         raise ValueError(
@@ -282,7 +293,7 @@ def read_bl(code: str, variable: str, date: int = None):
 
     data['date'] = pd.to_datetime(data.date.astype(str))
 
-    data = data.pivot(index='date', columns='Country', values=variable)
+    data = data.pivot(index='date', columns='Country', values=code)
 
     return data
 

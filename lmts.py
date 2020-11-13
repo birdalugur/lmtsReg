@@ -142,6 +142,10 @@ class Model:
         return self.__model.intercept_
 
     @property
+    def countries(self):
+        return self.training_data.index.values
+
+    @property
     def r_square(self):
         # TODO: r2 hesaplanacak
         pass
@@ -151,7 +155,7 @@ class Model:
         return self.__model.coef_
 
     def plot(self) -> go.Figure:
-        fig = px.scatter(x=self.training_data[0], y=self.target_values)
+        fig = px.scatter(x=self.training_data[0], y=self.target_values, text=self.countries)
         fig.add_traces(go.Scatter(x=self.test_values[0], y=self.predict(), name='Regression Fit'))
         offline.plot(fig, filename='data/app/regression.html')
 

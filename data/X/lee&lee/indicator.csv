@@ -1,19 +1,19 @@
-indicator name,indicator code,variable
-"Educational Attainment for Total Population, 1870-2010",attain,primary_total
-"Educational Attainment for Total Population, 1870-2010",attain,No Schooling
-"Educational Attainment for Total Population, 1870-2010",attain,primary_completed
-"Educational Attainment for Total Population, 1870-2010",attain,secondary_total
-"Educational Attainment for Total Population, 1870-2010",attain,secondary_completed
-"Educational Attainment for Total Population, 1870-2010",attain,tertiary_total
-"Educational Attainment for Total Population, 1870-2010",attain,tertiary_completed
-"Educational Attainment for Total Population, 1870-2010",attain,Avg. Years of Total Schooling
-"Educational Attainment for Total Population, 1870-2010",attain,Avg. Years of Primary Schooling
-"Educational Attainment for Total Population, 1870-2010",attain,Avg. Years of Secondary Schooling
-"Educational Attainment for Total Population, 1870-2010",attain,Avg. Years of Tertiary\n Schooling
-"Educational Attainment for Total Population, 1870-2010",attain,	Population\n(1000s)
-"Enrollment Ratios for Total Population, 1820-2010",enrol,Primary
-"Enrollment Ratios for Total Population, 1820-2010",enrol,Secondary
-"Enrollment Ratios for Total Population, 1820-2010",enrol,Tertiary
-"Human Capital Stock for Total Population, 1870-2010",hc,Human Capital
-"Human Capital Stock for Total Population, 1870-2010",hc,Human Capital Alternative
-"Human Capital Stock for Total Population, 1870-2010",hc,Population\n(1000s) 
+indicator name,indicator code
+"Educational Attainment for Total Population, 1870-2010",attain_primary_total
+"Educational Attainment for Total Population, 1870-2010",attain_No Schooling
+"Educational Attainment for Total Population, 1870-2010",attain_primary_completed
+"Educational Attainment for Total Population, 1870-2010",attain_secondary_total
+"Educational Attainment for Total Population, 1870-2010",attain_secondary_completed
+"Educational Attainment for Total Population, 1870-2010",attain_tertiary_total
+"Educational Attainment for Total Population, 1870-2010",attain_tertiary_completed
+"Educational Attainment for Total Population, 1870-2010",attain_Avg. Years of Total Schooling
+"Educational Attainment for Total Population, 1870-2010",attain_Avg. Years of Primary Schooling
+"Educational Attainment for Total Population, 1870-2010",attain_Avg. Years of Secondary Schooling
+"Educational Attainment for Total Population, 1870-2010",attain_Avg. Years of Tertiary\n Schooling
+"Educational Attainment for Total Population, 1870-2010",attain_Population\n(1000s)
+"Enrollment Ratios for Total Population, 1820-2010",enrol_Primary
+"Enrollment Ratios for Total Population, 1820-2010",enrol_Secondary
+"Enrollment Ratios for Total Population, 1820-2010",enrol_Tertiary
+"Human Capital Stock for Total Population, 1870-2010",hc_Human Capital
+"Human Capital Stock for Total Population, 1870-2010",hc_Human Capital Alternative
+"Human Capital Stock for Total Population, 1870-2010",hc_Population\n(1000s) 
