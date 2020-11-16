@@ -5,6 +5,7 @@
 import os
 import subprocess
 import inspect
+from typing import Union, List
 
 import pandas as pd
 import numpy as np
@@ -17,6 +18,10 @@ import plotly.graph_objects as go
 
 
 def create_appdata():
+    """
+    Data dizini altında app klasörü oluşturur.
+    app klasöründe uygulama verileri saklanır.
+    """
     try:
         os.mkdir('data/app')
     except FileExistsError:
@@ -31,54 +36,87 @@ def retrieve_name(var):
     return [var_name for var_name, var_val in callers_local_vars if var_val is var][0]
 
 
-def ln(df):
+def ln(data: Union[List[pd.DataFrame], pd.DataFrame]) -> Union[List[pd.DataFrame], pd.DataFrame]:
     """
-    Doğal logaritmayı hesaplar."""
-    if isinstance(df, list):
+    Doğal logaritmayı hesaplar.
+
+    Args:
+        data (Dataframe or list)
+    Returns:
+        Dataframe or List
+    """
+    if isinstance(data, list):
         ln_list = []
-        for _df in df:
+        for _df in data:
             ln_list.append(np.log(_df))
         return ln_list
-    return np.log(df)
+    return np.log(data)
 
 
-def diff(df, country, drop=False):
+def diff(df: pd.DataFrame, subtrahend: str, drop: bool = False) -> Union[pd.DataFrame, list]:
     """
-    Example: X-USA"""
+    Verinin subtrahend ile belirtilen sütundan farkını alın.
+
+    Args:
+        df : Dataframe or List
+        subtrahend : Çıkarılacak sütun adı. Ortalama için 'mean' ayarlanmalı.
+        drop: subtrahend ile belirtilen sütun dataframe'den çıkarılsın mı?
+
+    Returns:
+        Union[pd.DataFrame, list]
+    """
 
     if isinstance(df, list):
         diff_list = []
         for _df in df:
-            if country == 'mean':
+            if subtrahend == 'mean':
                 diff_value = _df.mean(axis=1)
             else:
-                diff_value = _df[country]
+                diff_value = _df[subtrahend]
             diff = _df.sub(diff_value, axis=0)
             if drop:
-                diff = diff.drop(country, axis=1)
+                diff = diff.drop(subtrahend, axis=1)
             diff_list.append(diff)
         return diff_list
-    if country == 'mean':
+    if subtrahend == 'mean':
         diff_value = df.mean(axis=1)
     else:
-        diff_value = df[country]
+        diff_value = df[subtrahend]
     diff = df.sub(diff_value, axis=0)
     if drop:
-        diff = diff.drop(country, axis=1)
+        diff = diff.drop(subtrahend, axis=1)
     return diff
 
 
-def constrain(data, n):
+def constrain(data: pd.DataFrame, n: int) -> pd.DataFrame:
     """
-    n'den veri içeren sütunları kaldır."""
+    Belirtilen sayıdan az veri içeren sütunları DataFrame'den kaldırır.
+
+    Args:
+        data: Kısıta göre yeniden düzenlenecek veri.
+        n: kısıt sayısı
+
+    Returns:
+        pd.DataFrame
+    """
 
     data = data[data.columns[data.count() >= n]]
     return data
 
 
-def get_d_values(df):
+def get_d_values(df: pd.DataFrame):
     """
-    Run the R script and get the results."""
+    Run the R script and get the results.
+    R'ın LongMemoryTS paketini kullanarak d'leri hesaplar.
+    Rscript çalıştırır ve sonuçları döndürür.
+
+    Args:
+        df : Date x Country
+
+    Returns: 'elw_m', 'elw_n', 'elw2s_v0', 'elw2s_v1', 'elw2s_h0', 'elw2s_h1', 'gph',
+       'hou_perron', 'local_w' verileri içeren Dataframe
+
+    """
     file = 'data/app/lndiff.csv'
     df.to_csv('data/app/lndiff.csv')
 
@@ -97,24 +135,46 @@ def get_d_values(df):
     return d
 
 
-def mean(data):
+def mean(data: Union[List[pd.DataFrame], pd.DataFrame]):
+    """
+    Aritmetik ortalamayı hesaplar.
+
+    Returns: DataFrame or List of DataFrame
+    """
     if isinstance(data, list):
         return list(map(lambda x: x.mean(), data))
     return data.mean()
 
 
-def intersection(X, y):
-    X = pd.concat(X, axis=1).dropna()
-    countries = y.index.intersection(X.index)
-    X = X.loc[countries]
+def intersection(x: list, y:pd.Series):
+    """
+    Ülkelerin kesişimini alın.
+
+    Args:
+        x: (list of series) : Regresyonda kullanılacak x değerlerinin listesi.
+        y: pd.Series
+
+    Returns: new x and y
+    """
+    x = pd.concat(x, axis=1).dropna()
+    countries = y.index.intersection(x.index)
+    x = x.loc[countries]
     y = y[countries]
-    return X, y
+    return x, y
 
 
-def test_data(X):
-    # Test Verisi
-    test = X.copy()
-    average = X.mean()[1:]
+def test_data(x):
+    """
+    Eğitim verilerinden kullanarak test verisi oluştur.
+
+    Args:
+        x: (pd.DataFrame) : Training data
+
+    Returns:
+        Test Data
+    """
+    test = x.copy()
+    average = x.mean()[1:]
     for i in average.index:
         test[i] = average[i]
 
@@ -123,12 +183,21 @@ def test_data(X):
 
 
 class Model:
+    """
+    En küçük kareler yöntemini kullanan Doğrusal Regresyon işlemlerini gerçekleştirin.
+
+    Args:
+        training_data: (Dataframe): Kullanılacak X'leri içermelidir.
+        target_values: (Series): Kullanılacak d_values.
+        test_values: test verileri.
+
+    """
     __model = LinearRegression()
 
-    def __init__(self, X_true, y_true, X_test):
-        self.training_data = X_true
-        self.target_values = y_true
-        self.test_values = X_test
+    def __init__(self, training_data, target_values, test_values):
+        self.training_data = training_data
+        self.target_values = target_values
+        self.test_values = test_values
         self.__fit()
 
     def __fit(self):
@@ -139,10 +208,16 @@ class Model:
 
     @property
     def intercept(self):
+        """
+        y ekseni kesim noktası
+        """
         return self.__model.intercept_
 
     @property
     def countries(self):
+        """
+        Regresyonda kullanılan ülkeler
+        """
         return self.training_data.index.values
 
     @property
@@ -152,9 +227,15 @@ class Model:
 
     @property
     def cofficients(self):
+        """
+        tahmini katsayılar
+        """
         return self.__model.coef_
 
     def plot(self) -> go.Figure:
+        """
+        Regresyon grafiğini çizer ve data/app dizininde regression.html olarak kaydeder.
+        """
         fig = px.scatter(x=self.training_data[0], y=self.target_values, text=self.countries)
         fig.add_traces(go.Scatter(x=self.test_values[0], y=self.predict(), name='Regression Fit'))
         offline.plot(fig, filename='data/app/regression.html')

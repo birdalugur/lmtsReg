@@ -24,7 +24,7 @@ d_data = lmts.constrain(d_data, 48)
 d_values = lmts.get_d_values(d_data)
 
 # Read X values
-datawoid = data.read_wb('daa', date=1950)
+datawoid = data.read_woid('daa', date=1950)
 eora = data.read_eora('daa', date=1950)
 imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
 wbdata = data.read_wb('SP.POP.GROW', date=1950)

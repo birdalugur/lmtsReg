@@ -9,6 +9,8 @@ import pandas.tseries.offsets as offset
 
 # #### OECD VERİSİ -  PWT
 
+datasets = ['imf', 'bl', 'pwt', 'wb', 'eora', 'woid']
+
 
 def oecd():
     data_oecd = pd.read_csv('data/DP_LIVE_19082020122503891.csv')
@@ -25,6 +27,13 @@ def oecd():
 
 
 def read_pwt(code: str, date: int = None):
+    """
+    PWT veri setinden belirli verileri okuyun.
+
+    Args:
+        code: İstenen indicator'a ait kod.
+        date: Default None. Veri hangi yıldan itibaren alınsın?
+    """
     data = pd.read_excel(
         'data/pwt91.xlsx', sheet_name='Data', usecols=['year', 'countrycode', code])
 
@@ -42,9 +51,13 @@ def read_pwt(code: str, date: int = None):
     return data
 
 
-def read_eora(code, date=None):
+def read_eora(code: str, date=None):
     """
     Seçilen değişkene ait sektörlerin toplamını döndürür.
+
+    Args:
+        code: İstenen indicator'a ait kod.
+        date: Default None. Veri hangi yıldan itibaren alınsın?
     """
     data = pd.read_csv('data/X/eora/eora.csv')
     data = data.rename(columns={'year': 'date'})
@@ -62,9 +75,13 @@ def read_eora(code, date=None):
     return data
 
 
-def read_woid(code, date=None):
+def read_woid(code: str, date=None):
     """
     Seçilen değişkene ait sektörlerin toplamını döndürür.
+
+    Args:
+        code: İstenen indicator'a ait kod.
+        date: Default None. Veri hangi yıldan itibaren alınsın?
     """
     data = pd.read_csv('data/X/woid/WOID_data.csv')
     data = data.rename(columns={'year': 'date'})
@@ -85,7 +102,17 @@ def read_woid(code, date=None):
 # #### source
 
 
-def source(name):
+def source(name: str = None) -> pd.DataFrame:
+    """
+    Veri setlerine ait indicator ve kodları almak için kullanılır.
+    Parametre geçilmezse veri setlerini belirten mesaj döndürür.
+
+    Args:
+        name (str) : Default None. İstenen veri seti:
+            data.datesets ile belirtilmiştir.
+    """
+    if name is None:
+        return "{} veri setlerinden birini kullanın".format(datasets)
     if name == 'imf':
         return __imf_source()
     elif name == 'bl':
@@ -124,6 +151,15 @@ def __pwt_source():
 
 
 def read_imf(code: str, frequency: str, date: int = None):
+    """
+    IMF veri setinden belirli verileri okuyun.
+
+    Args:
+        code: İstenen indicator'a ait kod.
+        frequency (str) : quarterly veriler kontrol edilmek isteniyorsa 'q',
+            annually veriler için 'a' ayarlanmalı.
+        date: Default None. Veri hangi yıldan itibaren alınsın?
+    """
     base_path = 'data/X/imf/{}.csv'
     frequency = frequency.lower()
     if frequency == 'q':
@@ -172,6 +208,13 @@ def __concat_excel():
 
 
 def read_wb(code: str, date=None):
+    """
+    World Bank veri setinden belirli verileri okuyun.
+
+    Args:
+        code: İstenen indicator'a ait kod.
+        date: Default None. Veri hangi yıldan itibaren alınsın?
+    """
     base_path = 'data/X/wb/{}.csv'
     path = base_path.format(code)
 
@@ -337,6 +380,11 @@ def __date_control(x):
 def control(data, freq: str = 'a', name=None):
     """
     Verileri kontrol etmek için kullanılır.
+
+    Args:
+        data (Dataframe or Serie) : Kontrol edilmek istenen veri.
+        freq (str) : Default 'a'. Eğer quarterly veriler kontrol edilmek isteniyorsa 'q' ayarlanmalı.
+        name (str) : Kontrol sonucunu adlandırmak için kullanılır.
     """
     df = data.copy()
 
