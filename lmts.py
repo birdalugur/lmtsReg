@@ -124,7 +124,7 @@ def get_d_values(df: pd.DataFrame):
         command = 'Rscript dvals.R {}'.format(file)
         os.system(command)
     else:
-        command = 'C:/Program Files/R/R-3.6.3/bin/x64/Rscript dvals.R {}'.format(file)
+        command = 'C:/Program Files/R/R-4.0.3/bin/x64/Rscript dvals.R {}'.format(file)
         subprocess.call(command)
 
     try:
