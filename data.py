@@ -6,20 +6,19 @@ import os
 import pandas as pd
 import pandas.tseries.offsets as offset
 
-
 # #### OECD VERİSİ -  PWT
 
 datasets = ['imf', 'bl', 'pwt', 'wb', 'eora', 'woid']
 
 
-def oecd():
+def oecd(frequency: str, measure: str, subject: str):
     data_oecd = pd.read_csv('data/DP_LIVE_19082020122503891.csv')
 
     data_oecd = data_oecd.rename(columns={'TIME': 'date'})
 
     # Frequency: Q (quarterly), Measure:  Index, Subject:  volidx Olanlar Seçiliyor
-    data_oecd = data_oecd[(data_oecd['FREQUENCY'] == 'Q') & (
-            data_oecd['MEASURE'] == 'IDX') & (data_oecd['SUBJECT'] == 'VOLIDX')]
+    data_oecd = data_oecd[(data_oecd['FREQUENCY'] == frequency.upper()) & (
+            data_oecd['MEASURE'] == measure) & (data_oecd['SUBJECT'] == subject)]
 
     oecd = data_oecd.pivot(index='date', columns='LOCATION', values='Value')
     oecd.columns.name = None
