@@ -124,6 +124,8 @@ def source(name: str = None) -> pd.DataFrame:
         definition = pd.read_csv('data/X/eora/indicator.csv')
     elif name == 'woid':
         definition = pd.read_csv('data/X/woid/indicator.csv')
+    elif name == 'oecd':
+        return __source_oecd()
     else:
         raise ValueError('No source with specified name.')
     return definition
@@ -140,6 +142,11 @@ def __imf_source():
         available)]
 
     return imf_source
+
+
+def __source_oecd():
+    data_oecd = pd.read_csv('data/DP_LIVE_19082020122503891.csv')
+    return dict(measure=data_oecd['MEASURE'].unique().tolist(), subject=data_oecd['SUBJECT'].unique().tolist())
 
 
 def __pwt_source():

@@ -7,6 +7,7 @@ source_bl = data.source('bl')
 source_wb = data.source('wb')
 source_pwt = data.source('pwt')
 source_eora = data.source('eora')
+source_oecd = data.source('oecd')
 
 # d'leri hesaplamak için veri okunuyor
 d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
