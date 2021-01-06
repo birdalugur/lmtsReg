@@ -27,7 +27,9 @@ d_values = lmts.get_d_values(d_data)
 # Read X values
 dataoecd = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
 datawoid = data.read_woid('daa', date=1950)
-eora = data.read_eora('daa', date=1950)
+eora_gvc = data.read_eora('gvc', date=1950)
+eora_gexp = data.read_eora('gexp', date=1950)
+eora = eora_gvc / eora_gexp
 imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
 wbdata = data.read_wb('SP.POP.GROW', date=1950)
 bldata = data.read_bl(code='attain_No Schooling', date=1950)
