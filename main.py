@@ -59,3 +59,7 @@ X_test = lmts.test_data(X)
 # Regresyon
 model = lmts.Model(X, y, X_test)
 model.plot()
+
+# Katsayılar
+katsayilar = model.cofficients
+y_kesme_noktasi = model.intercept
