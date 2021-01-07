@@ -56,6 +56,16 @@ X, y = lmts.intersection(X, y_true)
 # tahmin için test verisi oluşturma
 X_test = lmts.test_data(X)
 
+
+# std error
+import statsmodels.api as sm
+
+ols = sm.OLS(y, X)
+ols_result = ols.fit()
+std_error = ols_result.bse
+ols_result.summary()
+
+
 # Regresyon
 model = lmts.Model(X, y, X_test)
 model.plot()
