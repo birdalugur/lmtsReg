@@ -8,7 +8,7 @@ import pandas.tseries.offsets as offset
 
 # #### OECD VERİSİ -  PWT
 
-datasets = ['imf', 'bl', 'pwt', 'wb', 'eora', 'woid']
+datasets = ['imf', 'bl', 'pwt', 'wb', 'eora', 'woid','tivan']
 
 
 def oecd(frequency: str, measure: str, subject: str):
@@ -98,6 +98,30 @@ def read_woid(code: str, date=None):
     return data
 
 
+def read_tivan(code: str, date=None):
+    """
+    Seçilen değişkene ait sektörlerin toplamını döndürür.
+
+    Args:
+        code: İstenen indicator'a ait kod.
+        date: Default None. Veri hangi yıldan itibaren alınsın?
+    """
+    data = pd.read_csv('data/X/tivan/tivan.csv')
+    data = data.rename(columns={'year': 'date'})
+    data['date'] = pd.to_datetime(data.date.astype(str))
+    data = data[data.type == code]
+    if date is not None:
+        data = data[data.date >= str(date)]
+
+    data = data \
+        .set_index(['date', 'country']) \
+        .sum(axis=1) \
+        .reset_index() \
+        .pivot(index='date', columns='country', values=0)
+
+    return data
+
+
 # #### source
 
 
@@ -126,6 +150,8 @@ def source(name: str = None) -> pd.DataFrame:
         definition = pd.read_csv('data/X/woid/indicator.csv')
     elif name == 'oecd':
         return __source_oecd()
+    elif name == 'tivan':
+        definition = pd.read_csv('data/X/tivan/indicator.csv')
     else:
         raise ValueError('No source with specified name.')
     return definition

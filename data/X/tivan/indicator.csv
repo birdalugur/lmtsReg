@@ -1,0 +1,14 @@
+Indicator Name,Indicator Code
+VAX -> DVA absorbed abroad,daa
+DAVAX,davax
+Domestic content (DC),dc
+Domestic double counting ,ddc
+Domestic Value-Added (DVA),dva
+Foreign content (FC),fc
+Foreign double counting,fdc
+Foreign Value-Added (FVA),fva
+Gross exports (GEXP) ,gexp
+GVC-related trade (GVC),gvc
+GVC-backward (GVCB),gvcb
+GVC-forward (GVCF),gvcf
+Reflection,reflection

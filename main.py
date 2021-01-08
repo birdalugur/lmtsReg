@@ -8,6 +8,7 @@ source_wb = data.source('wb')
 source_pwt = data.source('pwt')
 source_eora = data.source('eora')
 source_oecd = data.source('oecd')
+source_tivan = data.source('tivan')
 
 # d'leri hesaplamak için veri okunuyor
 d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
@@ -34,6 +35,10 @@ imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
 wbdata = data.read_wb('SP.POP.GROW', date=1950)
 bldata = data.read_bl(code='attain_No Schooling', date=1950)
 pwtdata = data.read_pwt(code='statcap', date=None)
+
+tivan_gvc = data.read_tivan('gvc', date=1950)
+tivan_gexp = data.read_tivan('gexp', date=1950)
+tivan = tivan_gvc / tivan_gexp
 
 # Birden fazla değişken için ln alma
 imfdata, pwtdata = lmts.ln([imfdata, pwtdata])
