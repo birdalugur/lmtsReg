@@ -18,7 +18,7 @@ source_tivan = data.source('tivan')
 # gdp_imf = data.read_imf('NGDP_XDC', 'q', date=1970)
 # data_control_1 = data.control(gdp_imf,freq='q')
 
-#gdp_oecd = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
+# gdp_oecd = data.oecd(frequency='q', measure='IDX', subject='VOLIDX', date=1955)
 #data_control_2 = data.control(gdp_oecd,freq='q')
 
 # reading data for computing d's

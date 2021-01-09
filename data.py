@@ -16,7 +16,7 @@ COUNTRY_LIST = ['CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN',
                 'SWE', 'TUR', 'USA', 'ZAF']
 
 
-def oecd(frequency: str, measure: str, subject: str):
+def oecd(frequency: str, measure: str, subject: str, date=None):
     data_oecd = pd.read_csv('data/DP_LIVE_19082020122503891.csv')
 
     data_oecd = data_oecd.rename(columns={'TIME': 'date'})
@@ -28,6 +28,8 @@ def oecd(frequency: str, measure: str, subject: str):
     oecd = data_oecd.pivot(index='date', columns='LOCATION', values='Value')
     oecd.columns.name = None
     oecd.index = pd.to_datetime(oecd.index)
+    if date is not None:
+        oecd = oecd[oecd.index >= str(date)]
     return oecd
 
 
