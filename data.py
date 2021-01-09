@@ -8,7 +8,12 @@ import pandas.tseries.offsets as offset
 
 # #### OECD VERİSİ -  PWT
 
-datasets = ['imf', 'bl', 'pwt', 'wb', 'eora', 'woid','tivan']
+datasets = ['imf', 'bl', 'pwt', 'wb', 'eora', 'woid', 'tivan']
+COUNTRY_LIST = ['CRI', 'CZE', 'DEU', 'DNK', 'ESP', 'EST', 'FIN',
+                'FRA', 'GBR', 'GRC', 'HUN', 'IDN', 'IND', 'IRL', 'ISL',
+                'ISR', 'ITA', 'JPN', 'KOR', 'LTU', 'LUX', 'LVA', 'MEX', 'NLD', 'NOR',
+                'NZL', 'POL', 'PRT', 'ROU', 'RUS', 'SAU', 'SVK', 'SVN',
+                'SWE', 'TUR', 'USA', 'ZAF']
 
 
 def oecd(frequency: str, measure: str, subject: str):
@@ -22,6 +27,7 @@ def oecd(frequency: str, measure: str, subject: str):
 
     oecd = data_oecd.pivot(index='date', columns='LOCATION', values='Value')
     oecd.columns.name = None
+    oecd.index = pd.to_datetime(oecd.index)
     return oecd
 
 
@@ -120,8 +126,6 @@ def read_tivan(code: str, date=None):
         .pivot(index='date', columns='country', values=0)
 
     return data
-
-
 # #### source
 
 

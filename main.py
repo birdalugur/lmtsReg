@@ -8,16 +8,29 @@ source_wb = data.source('wb')
 source_pwt = data.source('pwt')
 source_eora = data.source('eora')
 source_oecd = data.source('oecd')
+source_woid = data.source('woid')
 source_tivan = data.source('tivan')
 
-# d'leri hesaplamak için veri okunuyor
-d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
+# reading data from sources (syntax sre somewhat different in oecd)
+# and control their availability for different countries
+# pop = data.read_wb('SP.POP.GROW', date=1950)
+# data_control = data.control(pop)
+# gdp_imf = data.read_imf('NGDP_XDC', 'q', date=1970)
+# data_control_1 = data.control(gdp_imf,freq='q')
+
+#gdp_oecd = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
+#data_control_2 = data.control(gdp_oecd,freq='q')
+
+# reading data for computing d's
+# d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
+#d_data = data.read_pwt('rgdpna', date=1970)
+d_data = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
 
 # Ln hesaplama
 d_data = lmts.ln(d_data)
 
 # data-USA
-d_data = lmts.diff(d_data, 'USA', drop=True)
+d_data = lmts.diff(d_data, 'mean', drop=False)
 
 # 48'den az veri içeren ülkeleri kaldır
 d_data = lmts.constrain(d_data, 48)
@@ -26,55 +39,57 @@ d_data = lmts.constrain(d_data, 48)
 d_values = lmts.get_d_values(d_data)
 
 # Read X values
-dataoecd = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
-datawoid = data.read_woid('daa', date=1950)
-eora_gvc = data.read_eora('gvc', date=1950)
-eora_gexp = data.read_eora('gexp', date=1950)
-eora = eora_gvc / eora_gexp
-imfdata = data.read_imf('BFXF_BP6_USD', 'a', date=1950)
-wbdata = data.read_wb('SP.POP.GROW', date=1950)
-bldata = data.read_bl(code='attain_No Schooling', date=1950)
-pwtdata = data.read_pwt(code='statcap', date=None)
+
+gvc = data.read_woid('gvc', date=1950)
+gexp = data.read_woid('gexp', date=1950)
+gvcp_woid = gvc / gexp
+
+gvc = data.read_eora('gvc', date=1950)
+gexp = data.read_eora('gexp', date=1950)
+gvcp_eora = gvc / gexp
 
 tivan_gvc = data.read_tivan('gvc', date=1950)
 tivan_gexp = data.read_tivan('gexp', date=1950)
 tivan = tivan_gvc / tivan_gexp
 
-# Birden fazla değişken için ln alma
-imfdata, pwtdata = lmts.ln([imfdata, pwtdata])
+hc = data.read_bl('hc_Human Capital', date=1950)
+# hc_s = data.read_bl(code='attain_No Schooling', date=1950)
+pop = data.read_wb('SP.POP.GROW', date=1950)
+inf = data.read_wb('FP.CPI.TOTL.ZG', date=1950)
+cap = data.read_wb('NE.GDI.TOTL.ZS', date=1950)
+govdebt = data.read_wb('GC.DOD.TOTL.GD.ZS', date=1950)
+
+# take logarithms
+# imfdata, pwtdata = lmts.ln([imfdata, pwtdata])
 
 # Birden fazla değişken için USA farkı hesaplama
-wbdata, bldata = lmts.diff([wbdata, bldata], 'USA', drop=True)
+# gvcp_eora, hc, pop, inf, cap, govdebt = lmts.diff([gvcp_eora, hc, pop, inf, cap, govdebt], 'USA', drop=True)
 
 # Regresyon için independent değişkenleri seçme
-X = [eora, pwtdata, wbdata]
+X = [gvcp_eora, hc, pop, inf, cap, govdebt]
 
 # Ortalamaları alma
 X = lmts.mean(X)
 
-# y_true
-y_true = d_values.elw_m
+# y values
+y = d_values.local_w
 
-# kesişim
-X, y = lmts.intersection(X, y_true)
+# intersection of countries
+X, y = lmts.intersection(X, y)
 
-# tahmin için test verisi oluşturma
-X_test = lmts.test_data(X)
+# Regression
 
-
-# std error
 import statsmodels.api as sm
 
 ols = sm.OLS(y, X)
 ols_result = ols.fit()
-std_error = ols_result.bse
+std_error =ols_result.bse
 ols_result.summary()
 
+# Scatter Plot with several X
+# Fitted vaues at means of X
 
-# Regresyon
+X_test = lmts.test_data(X)
 model = lmts.Model(X, y, X_test)
 model.plot()
 
-# Katsayılar
-katsayilar = model.cofficients
-y_kesme_noktasi = model.intercept
