@@ -1,5 +1,6 @@
 import lmts
 import data
+import pandas as pd
 
 # source değişkenleri
 source_imf = data.source('imf')
@@ -19,15 +20,12 @@ source_tivan = data.source('tivan')
 # data_control_1 = data.control(gdp_imf,freq='q')
 
 # gdp_oecd = data.oecd(frequency='q', measure='IDX', subject='VOLIDX', date=1955)
-#data_control_2 = data.control(gdp_oecd,freq='q')
+# data_control_2 = data.control(gdp_oecd,freq='q')
 
 # reading data for computing d's
 # d_data = data.read_imf('NGDP_XDC', 'q', date=1970)
-#d_data = data.read_pwt('rgdpna', date=1970)
+# d_data = data.read_pwt('rgdpna', date=1970)
 d_data = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
-
-# her yil icin baslangic degeri
-initial_oecd = d_data.resample('Y').apply(lambda x: x.dropna().head(1)).droplevel(0)
 
 # Ln hesaplama
 d_data = lmts.ln(d_data)
@@ -78,6 +76,12 @@ merged_X = pd.concat(X, keys=names)
 # write csv
 merged_X.to_csv('X_values')
 
+
+def initial_func(x): return x.dropna().groupby(level=0).resample('Y', level='date').apply(lambda x: x.head(1))
+
+
+initial = merged_X.apply(initial_func)
+
 # Ortalamaları alma
 X = lmts.mean(X)
 
@@ -93,7 +97,7 @@ import statsmodels.api as sm
 
 ols = sm.OLS(y, X)
 ols_result = ols.fit()
-std_error =ols_result.bse
+std_error = ols_result.bse
 ols_result.summary()
 
 # Scatter Plot with several X
@@ -102,4 +106,3 @@ ols_result.summary()
 X_test = lmts.test_data(X)
 model = lmts.Model(X, y, X_test)
 model.plot()
-
