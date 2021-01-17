@@ -26,6 +26,9 @@ source_tivan = data.source('tivan')
 #d_data = data.read_pwt('rgdpna', date=1970)
 d_data = data.oecd(frequency='q', measure='IDX', subject='VOLIDX')
 
+# her yil icin baslangic degeri
+initial_oecd = d_data.resample('Y').apply(lambda x: x.dropna().head(1)).droplevel(0)
+
 # Ln hesaplama
 d_data = lmts.ln(d_data)
 
@@ -67,6 +70,13 @@ govdebt = data.read_wb('GC.DOD.TOTL.GD.ZS', date=1950)
 
 # Regresyon için independent değişkenleri seçme
 X = [gvcp_eora, hc, pop, inf, cap, govdebt]
+
+# X değişkenlerini csv'ye yazma
+names = ['gvcp_eora', 'hc', 'pop', 'inf', 'cap', 'govdebt']
+merged_X = pd.concat(X, keys=names)
+
+# write csv
+merged_X.to_csv('X_values')
 
 # Ortalamaları alma
 X = lmts.mean(X)
