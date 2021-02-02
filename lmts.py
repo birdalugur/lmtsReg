@@ -163,6 +163,38 @@ def intersection(x: list, y:pd.Series):
     return x, y
 
 
+
+def country_intersection(merged_X):
+    interlist = list(merged_X.groupby(level='date'))
+
+    x = interlist[0][1]
+    x = x.index.get_level_values(1)
+
+    for i in range(1, len(interlist)):
+        y = interlist[i][1]
+        y = y.index.get_level_values(1)
+        x = x.intersection(y)
+
+    return x
+
+
+
+def initial_values(data):
+
+    x = data.unstack(0)
+
+    x.iloc[:, 0]
+
+    for col in x.columns:
+        x[col] = x.iloc[:, 0]
+    return  x
+
+
+def buyume_orani(data):
+    x = data.unstack(1)
+    return x.diff() / x
+
+
 def test_data(x):
     """
     Eğitim verilerinden kullanarak test verisi oluştur.

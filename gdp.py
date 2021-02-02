@@ -88,21 +88,22 @@ ci = lmts.country_intersection(merged_X)
 
 merged_X = merged_X[merged_X.index.get_level_values(1).isin(ci)]
 
-initial_gdp = lmts.initial_values(merged_X['gdp'])
-merged_X['initial_gdp'] = initial_gdp.unstack()
-
-growth = lmts.growth(merged_X[['gdp','pop']])
-
-merged_X[['growth_gdp','growth_pop']] = growth.stack()
-
 # write csv
 merged_X.reset_index()\
     .assign(date=merged_X.reset_index().date.dt.year)\
-    .to_csv('x_values.csv', index=False)
+    .to_csv('x_values.csv',index=False)
 
-average = merged_X[['pop', 'gdp']].groupby(level=1).mean()
+
+init_gdp = lmts.initial_values(merged_X)
+
+
+average = merged_X[['pop','gdp']]
+average = average.groupby(level=1).mean()
 average.to_csv('average.csv')
 
+init_gdp
+
+lmts.buyume_orani(merged_X[['gdp', 'pop']])
 # Ortalamaları alma
 
 
