@@ -103,7 +103,7 @@ average.to_csv('average.csv')
 
 init_gdp
 
-lmts.buyume_orani(merged_X[['gdp', 'pop']])
+lmts.growth(merged_X[['gdp', 'pop']])
 # Ortalamaları alma
 
 

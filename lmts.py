@@ -190,7 +190,7 @@ def initial_values(data):
     return  x
 
 
-def buyume_orani(data):
+def growth(data):
     x = data.unstack(1)
     return x.diff() / x
 
