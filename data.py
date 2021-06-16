@@ -204,6 +204,8 @@ def read_imf(code: str, frequency: str, date: int = None):
         frequency = 'quarterly'
     elif frequency.lower() == 'a':
         frequency = 'annually'
+    elif frequency.lower() == 'm':
+        frequency = 'monthly'
     else:
         raise ValueError('frequency must be a (annualy) or q (quarterly)')
 
@@ -222,7 +224,7 @@ def read_imf(code: str, frequency: str, date: int = None):
         'indicator', axis=1).set_index('date')
 
     data = data[~data.index.duplicated()]
-
+    data= data.sort_index()
     return data
 
 
